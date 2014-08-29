@@ -1,5 +1,5 @@
 {
-    "name": "easyxml",
+    "name": "easyxml-ts",
     "preferGlobal": false,
     "version": "0.0.4",
     "main": "easyxml.js",
