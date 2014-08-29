@@ -1,7 +1,7 @@
 {
     "name": "easyxml-ts",
     "preferGlobal": false,
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "easyxml.js",
     "author": "Thomas Hunter <tlhunter@gmail.com>",
     "description": "A configurable object to XML converter",
@@ -17,6 +17,10 @@
         {
             "name": "Joshua Kalis",
             "email": "JoshKalis@QuickenLoans.com"
+        },
+        {
+            "name": "Iain Ballard",
+            "email": "iain.ballard@gmail.com"
         }
     ],
     "dependencies": {
