@@ -1,13 +1,16 @@
 {
     "name": "easyxml-ts",
     "preferGlobal": false,
-    "version": "0.0.8",
+    "version": "0.0.9",
     "main": "easyxml-ts.js",
     "author": "Thomas Hunter <tlhunter@gmail.com>",
-    "description": "A configurable object to XML converter",
+    "description": "A configurable object to XML converter, with Typescript headers",
     "repository": {
         "type": "git",
-        "url": "https://github.com/QuickenLoans/node-easyxml"
+        "url": "https://github.com/i-e-b/node-easyxml"
+    },
+    "scripts" : {
+        "test":"mocha"
     },
     "contributors": [
         {

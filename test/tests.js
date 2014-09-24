@@ -6,7 +6,7 @@ var assert  = require("chai").assert,
     fs      = require("fs"),
     path    = require("path"),
 
-    easyXML = require("../index.js");
+    easyXML = require("../easyxml-ts.js");
 
 describe("Node EasyXML", function () {
   var should = {
