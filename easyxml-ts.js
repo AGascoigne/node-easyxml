@@ -88,7 +88,7 @@ var EasyXml = function() {
                 if (!isAttribute(self))
                     el = subElement(parentXmlNode, key);
 
-                if (!self.config.singularizeChildren && typeof parentXmlNode === 'object' && typeof child === 'object') {
+                if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
                     for (var key in child) {
                         if (typeof child[key] === 'object') {
                             parseChildElement(el, child[key]);
@@ -135,7 +135,7 @@ var EasyXml = function() {
 
                     for (var key2 in child) {
                         // if unwrapped arrays, make new subelements on the parent.
-                        var el2 = (self.config.unwrappedArrays === true) ? ((el) || subElement(parentXmlNode, key)) : (subElement(el, subElementName));
+                        var el2 = (self.config.unwrappedArrays === true) ? (subElement(parentXmlNode, subElementName)) : (subElement(el, subElementName));
                         // Check type of child element
                         if (child.hasOwnProperty(key2) && typeof child[key2] === 'object') {
                             parseChildElement(el2, child[key2]);
@@ -143,8 +143,12 @@ var EasyXml = function() {
                             // Just add element directly without parsing
                             el2.text = child[key2].toString();
                         }
-                        // if unwrapped arrays, the initial child element has been consumed:
-                        if (self.config.unwrappedArrays === true) el = undefined;
+                    }
+                    // if unwrapped arrays, the initial child element has been consumed:
+                    if (self.config.unwrappedArrays === true) 
+                    {
+                        parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
+                        el = undefined;
                     }
                 } else if (typeof child === 'object') {
                     // Object, go deeper
