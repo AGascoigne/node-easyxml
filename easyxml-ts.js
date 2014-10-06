@@ -40,7 +40,6 @@ var EasyXml = function() {
     self.config = {
         singularizeChildren: true,
         underscoreAttributes: true,
-        deleteParentAfterUnwrap: true,
         underscoreChar: '_',
         rootElement: 'response',
         dateFormat: 'ISO', // ISO = ISO8601, SQL = MySQL Timestamp, JS = (new Date).toString()
@@ -89,7 +88,7 @@ var EasyXml = function() {
                 if (!isAttribute(self))
                     el = subElement(parentXmlNode, key);
 
-                if (!self.config.singularizeChildren && typeof parentXmlNode === 'object' && typeof child === 'object') {
+                if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
                     for (var key in child) {
                         if (typeof child[key] === 'object') {
                             parseChildElement(el, child[key]);
@@ -148,12 +147,8 @@ var EasyXml = function() {
                     // if unwrapped arrays, the initial child element has been consumed:
                     if (self.config.unwrappedArrays === true) 
                     {
+                        parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
                         el = undefined;
-
-                        if(self.config.deleteParentAfterUnwrap === true)
-                        {
-                            parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
-                        }
                     }
                 } else if (typeof child === 'object') {
                     // Object, go deeper
