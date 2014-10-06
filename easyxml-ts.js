@@ -40,6 +40,7 @@ var EasyXml = function() {
     self.config = {
         singularizeChildren: true,
         underscoreAttributes: true,
+        deleteParentAfterUnwrap: true,
         underscoreChar: '_',
         rootElement: 'response',
         dateFormat: 'ISO', // ISO = ISO8601, SQL = MySQL Timestamp, JS = (new Date).toString()
@@ -135,7 +136,7 @@ var EasyXml = function() {
 
                     for (var key2 in child) {
                         // if unwrapped arrays, make new subelements on the parent.
-                        var el2 = (self.config.unwrappedArrays === true) ? ((el) || subElement(parentXmlNode, key)) : (subElement(el, subElementName));
+                        var el2 = (self.config.unwrappedArrays === true) ? (subElement(parentXmlNode, subElementName)) : (subElement(el, subElementName));
                         // Check type of child element
                         if (child.hasOwnProperty(key2) && typeof child[key2] === 'object') {
                             parseChildElement(el2, child[key2]);
@@ -143,8 +144,16 @@ var EasyXml = function() {
                             // Just add element directly without parsing
                             el2.text = child[key2].toString();
                         }
-                        // if unwrapped arrays, the initial child element has been consumed:
-                        if (self.config.unwrappedArrays === true) el = undefined;
+                    }
+                    // if unwrapped arrays, the initial child element has been consumed:
+                    if (self.config.unwrappedArrays === true) 
+                    {
+                        el = undefined;
+
+                        if(self.config.deleteParentAfterUnwrap === true)
+                        {
+                            parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
+                        }
                     }
                 } else if (typeof child === 'object') {
                     // Object, go deeper
