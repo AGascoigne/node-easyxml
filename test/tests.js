@@ -20,7 +20,8 @@ describe("Node EasyXML", function () {
         "unwrappedArrays" : "should be able to use unwrapped child nodes to represent an array",
         "wrappedArrays" : "should normally wrap array elements in a single parent element",
         "null"    : "should parse a null value",
-        "stressTest" : "should handle a stress test"
+        "stressTest" : "should handle a stress test",
+        "groupedAttributes" : "should be able to handle grouped attributes"
       };
 
   Object.keys(should)

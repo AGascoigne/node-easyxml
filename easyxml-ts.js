@@ -103,8 +103,11 @@ var EasyXml = function() {
                           parentXmlNode.text=child;
                         else
                           parentXmlNode.set(key.substring(1), child);
-                    } else {
-                        throw new Error(key + "contained non_string_attribute");
+                    } else { // add child key:value pairs as attributes
+                        //throw new Error(key + "contained non_string_attribute");
+                        Object.keys(child).forEach(function (attrKey){
+                            parentXmlNode.set(attrKey, child[attrKey]);
+                        });
                     }
                 } else if (child === null) {
                     el.text = ""
