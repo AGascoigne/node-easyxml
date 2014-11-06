@@ -160,6 +160,8 @@ var EasyXml = function() {
                     el.text = child.toString();
                 } else if (typeof child === 'string') {
                     el.text = child;
+                } else if (typeof child === 'undefined') {
+                    parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
                 } else {
                     throw new Error(key + " contained unknown_data_type: " + typeof child);
                 }

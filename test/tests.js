@@ -20,6 +20,7 @@ describe("Node EasyXML", function () {
         "unwrappedArrays" : "should be able to use unwrapped child nodes to represent an array",
         "wrappedArrays" : "should normally wrap array elements in a single parent element",
         "null"    : "should parse a null value",
+        "undefined":"should parse undefined values",
         "stressTest" : "should handle a stress test",
         "groupedAttributes" : "should be able to handle grouped attributes"
       };
@@ -49,6 +50,9 @@ describe("Node EasyXML", function () {
           }
 
           var json = require(file + ".json");
+          if (name === "undefined") {
+            json.undefinedz = undefined;
+          }
 
           assert.equal(easyXML.render(json), data, "EasyXML should create the correct XML from a JSON data structure.");
           assert.strictEqual(easyXML.render(json), data, "EasyXML should create the correct XML from a JSON data structure.");
