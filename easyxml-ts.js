@@ -7,12 +7,15 @@ var et = require('elementtree'),
 /**
  * This function merges two objects. Pretty simple stuff.
  */
-function merge(obj1, obj2) {
+function merge(obj1, obj2)
+{
     var obj3 = {};
-    for (var attr1 in obj1) {
+    for (var attr1 in obj1)
+    {
         obj3[attr1] = obj1[attr1];
     }
-    for (var attr2 in obj2) {
+    for (var attr2 in obj2)
+    {
         obj3[attr2] = obj2[attr2];
     }
     return obj3;
@@ -21,8 +24,10 @@ function merge(obj1, obj2) {
 /**
  * This function pads a number so that it is two digits
  */
-function zeroPadTen(val) {
-    if (val < 10) {
+function zeroPadTen(val)
+{
+    if (val < 10)
+    {
         return "0" + val;
     }
     return val;
@@ -31,7 +36,8 @@ function zeroPadTen(val) {
 /**
  * This is our main EasyXml object which gets exported as a module
  */
-var EasyXml = function() {
+var EasyXml = function ()
+{
     var self = this;
 
     /**
@@ -44,7 +50,8 @@ var EasyXml = function() {
         rootElement: 'response',
         dateFormat: 'ISO', // ISO = ISO8601, SQL = MySQL Timestamp, JS = (new Date).toString()
         manifest: false,
-        unwrappedArrays:false,
+        unwrappedArrays: false,
+        schema: null,
         indent: 4
     };
 
@@ -52,7 +59,8 @@ var EasyXml = function() {
      * Public
      * Merges in the provided config object with the defaults
      */
-    self.configure = function(config) {
+    self.configure = function (config)
+    {
         // should be merge, otherwise we lose defaults
         self.config = merge(self.config, config);
     };
@@ -61,10 +69,11 @@ var EasyXml = function() {
      * Public
      * Takes an object and returns an XML string
      */
-    self.render = function(object, rootElementOverride) {
+    self.render = function (object, objectType, rootElementOverride)
+    {
         var xml = element(rootElementOverride || self.config.rootElement);
 
-        parseChildElement(xml, object);
+        parseChildElement(xml, object, objectType);
 
         return new ElementTree(xml).write({
             xml_declaration: self.config.manifest,
@@ -74,98 +83,129 @@ var EasyXml = function() {
 
     /**
      * Recursive, Private
+     * Takes an object and calls appropriate function to generate xml node in document
+     */
+    function parseChildElement(parentXmlNode, parentObjectNode, objectType)
+    {
+        var remainingKeys = Object.keys(parentObjectNode);
+        if (self.config.schema && objectType) {
+            var schema = self.config.schema[objectType];
+            var elementInfo, elementNumber = 0;
+
+            while (elementInfo = schema[elementNumber++]) {
+                processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
+
+                // remove from unordered list and advance to next element in schema
+                delete remainingKeys[remainingKeys.indexOf(elementInfo.ElementName)];
+            }
+        }
+        // process any remaining properties in object key order
+        remainingKeys.forEach(function(key){
+            processChildElement(key, parentXmlNode, parentObjectNode, objectType);
+        });
+    }
+
+    /**
+     * Recursive, Private
      * Takes an object and attaches it to the XML doc
      */
-    function parseChildElement(parentXmlNode, parentObjectNode) {
-        for (var key in parentObjectNode) {
-            if (parentObjectNode.hasOwnProperty(key)) {
-                var isAttribute = function(slf) {
-                    return (self.config.underscoreAttributes && key.charAt(0) === self.config.underscoreChar);
-                };
-                var child = parentObjectNode[key];
-                var el = null;
+    function processChildElement(key, parentXmlNode, parentObjectNode, objectType)
+    {
+        if (!parentObjectNode.hasOwnProperty(key)){
+            return;
+        }
 
-                if (!isAttribute(self))
-                    el = subElement(parentXmlNode, key);
+        var child = parentObjectNode[key];
 
-                if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
-                    for (var key in child) {
-                        if (typeof child[key] === 'object') {
-                            parseChildElement(el, child[key]);
-                        } else {
-                            el = subElement(el, key);
-                            el.text = child[key].toString();
-                        }
-                    }
-                } else if (isAttribute(self)) {
-                    if (typeof child === 'string' || typeof child === 'number') {
-                        if(key === self.config.underscoreChar)
-                          parentXmlNode.text=child;
-                        else
-                          parentXmlNode.set(key.substring(1), child);
-                    } else { // add child key:value pairs as attributes
-                        //throw new Error(key + "contained non_string_attribute");
-                        Object.keys(child).forEach(function (attrKey){
-                            parentXmlNode.set(attrKey, child[attrKey]);
-                        });
-                    }
-                } else if (child === null) {
-                    el.text = ""
-                } else if (typeof child === 'object' && child.constructor && child.constructor.name && child.constructor.name === 'Date') {
-                    // Date
-                    if (self.config.dateFormat === 'ISO') {
-                        // ISO: YYYY-MM-DDTHH:MM:SS.mmmZ
-                        el.text = child.toISOString();
-                    } else if (self.config.dateFormat === 'SQL') {
-                        // SQL: YYYY-MM-DD HH:MM:SS
-                        var yyyy    = child.getFullYear();
-                        var mm      = zeroPadTen(child.getMonth() + 1);
-                        var dd      = zeroPadTen(child.getDate());
-                        var hh      = zeroPadTen(child.getHours());
-                        var min     = zeroPadTen(child.getMinutes());
-                        var ss      = zeroPadTen(child.getSeconds());
+        var isAttribute = function (slf)
+        {
+            return (slf.config.underscoreAttributes && key.charAt(0) === self.config.underscoreChar);
+        };
 
-                        el.text = [yyyy, '-', mm, '-', dd, ' ', hh, ':', min, ':', ss].join("");
-                    } else if (self.config.dateFormat === 'JS') {
-                        // JavaScript date format
-                        el.text = child.toString();
-                    } else {
-                        throw new Error(key + "contained unknown_date_format");
-                    }
-                } else if (typeof child === 'object' && child.constructor && child.constructor.name && child.constructor.name === 'Array') {
-                    // Array
-                    var subElementName = inflect.singularize(key);
+        var el = null;
 
-                    for (var key2 in child) {
-                        // if unwrapped arrays, make new subelements on the parent.
-                        var el2 = (self.config.unwrappedArrays === true) ? (subElement(parentXmlNode, subElementName)) : (subElement(el, subElementName));
-                        // Check type of child element
-                        if (child.hasOwnProperty(key2) && typeof child[key2] === 'object') {
-                            parseChildElement(el2, child[key2]);
-                        } else {
-                            // Just add element directly without parsing
-                            el2.text = child[key2].toString();
-                        }
-                    }
-                    // if unwrapped arrays, the initial child element has been consumed:
-                    if (self.config.unwrappedArrays === true) 
-                    {
-                        parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
-                        el = undefined;
-                    }
-                } else if (typeof child === 'object') {
-                    // Object, go deeper
-                    parseChildElement(el, child);
-                } else if (typeof child === 'number' || typeof child === 'boolean') {
-                    el.text = child.toString();
-                } else if (typeof child === 'string') {
-                    el.text = child;
-                } else if (typeof child === 'undefined') {
-                    parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
+        if (!isAttribute(self))
+            el = subElement(parentXmlNode, key);
+
+        if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
+            for (var innerKey in child) {
+                if (typeof child[innerKey] === 'object') {
+                    parseChildElement(el, child[innerKey], objectType);
                 } else {
-                    throw new Error(key + " contained unknown_data_type: " + typeof child);
+                    el = subElement(el, innerKey);
+                    el.text = child[innerKey].toString();
                 }
             }
+        } else if (isAttribute(self)) {
+            if (typeof child === 'string' || typeof child === 'number') {
+                if (key === self.config.underscoreChar)
+                    parentXmlNode.text = child;
+                else
+                    parentXmlNode.set(key.substring(1), child);
+            } else {
+                Object.keys(child).forEach(function (attrKey){
+                    parentXmlNode.set(attrKey, child[attrKey]);
+                });
+            }
+        } else if (child === null)
+        {
+            el.text = ""
+        } else if (typeof child === 'object' && child.constructor && child.constructor.name && child.constructor.name === 'Date')
+        {
+            // Date
+            if (self.config.dateFormat === 'ISO')
+            {
+                // ISO: YYYY-MM-DDTHH:MM:SS.mmmZ
+                el.text = child.toISOString();
+            } else if (self.config.dateFormat === 'SQL')
+            {
+                // SQL: YYYY-MM-DD HH:MM:SS
+                var yyyy = child.getFullYear();
+                var mm = zeroPadTen(child.getMonth() + 1);
+                var dd = zeroPadTen(child.getDate());
+                var hh = zeroPadTen(child.getHours());
+                var min = zeroPadTen(child.getMinutes());
+                var ss = zeroPadTen(child.getSeconds());
+
+                el.text = [yyyy, '-', mm, '-', dd, ' ', hh, ':', min, ':', ss].join("");
+            } else if (self.config.dateFormat === 'JS') {
+                // JavaScript date format
+                el.text = child.toString();
+            } else {
+                throw new Error(key + "contained unknown_date_format");
+            }
+        } else if (typeof child === 'object' && child.constructor && child.constructor.name && child.constructor.name === 'Array') {
+            // Array
+            var subElementName = inflect.singularize(key);
+
+            for (var key2 in child) {
+                // if unwrapped arrays, make new subelements on the parent.
+                var el2 = (self.config.unwrappedArrays === true) ? (subElement(parentXmlNode, subElementName)) : (subElement(el, subElementName));
+                // Check type of child element
+                if (child.hasOwnProperty(key2) && typeof child[key2] === 'object') {
+                    parseChildElement(el2, child[key2], objectType);
+                } else {
+                    // Just add element directly without parsing
+                    el2.text = child[key2].toString();
+                }
+            }
+            // if unwrapped arrays, the initial child element has been consumed:
+            if (self.config.unwrappedArrays === true)
+            {
+                parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
+                el = undefined;
+            }
+        } else if (typeof child === 'object') {
+            // Object, go deeper
+            parseChildElement(el, child, objectType);
+        } else if (typeof child === 'number' || typeof child === 'boolean') {
+            el.text = child.toString();
+        } else if (typeof child === 'string') {
+            el.text = child;
+        } else if (typeof child === 'undefined') {
+            parentXmlNode.delItem(parentXmlNode._children.indexOf(el));
+        } else {
+            throw new Error(key + " contained unknown_data_type: " + typeof child);
         }
     }
 };

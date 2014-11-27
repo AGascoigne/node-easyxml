@@ -22,13 +22,15 @@ describe("Node EasyXML", function () {
         "null"    : "should parse a null value",
         "undefined":"should parse undefined values",
         "stressTest" : "should handle a stress test",
-        "groupedAttributes" : "should be able to handle grouped attributes"
+        "groupedAttributes" : "should be able to handle grouped attributes",
+        "schemaOrder" : "should order output elements based on schema if one is provided"
       };
 
   Object.keys(should)
     .forEach(function(name){
       it(should[name], function (done) {
         var config = {};
+        var objectType = undefined;
         if (name === 'singularizeChildren' || name === 'singularizeChildren2') {
           config.singularizeChildren = false;
         } else {
@@ -38,6 +40,13 @@ describe("Node EasyXML", function () {
           config.unwrappedArrays = true;
         } else {
           config.unwrappedArrays = false;
+        }
+
+        if (name === 'schemaOrder') {
+          config.schema = require('./schemaOrderSchema');
+          objectType = "schemaRoot";
+        } else {
+          config.schema = null;
         }
 
         easyXML.configure(config);
@@ -54,8 +63,8 @@ describe("Node EasyXML", function () {
             json.undefinedz = undefined;
           }
 
-          assert.equal(easyXML.render(json), data, "EasyXML should create the correct XML from a JSON data structure.");
-          assert.strictEqual(easyXML.render(json), data, "EasyXML should create the correct XML from a JSON data structure.");
+          assert.equal(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
+          assert.strictEqual(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
 
           done();
         });
