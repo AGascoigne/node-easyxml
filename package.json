@@ -1,7 +1,7 @@
 {
     "name": "easyxml-ts",
     "preferGlobal": false,
-    "version": "0.0.14",
+    "version": "0.0.15",
     "main": "easyxml-ts.js",
     "author": "Thomas Hunter <tlhunter@gmail.com>",
     "description": "A configurable object to XML converter, with Typescript headers",
