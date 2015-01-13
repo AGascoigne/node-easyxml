@@ -92,7 +92,7 @@ var EasyXml = function ()
             var schema = self.config.schema[objectType];
             var elementInfo, elementNumber = 0;
 
-            while (elementInfo = schema[elementNumber++]) {
+            if (schema) while (elementInfo = schema[elementNumber++]) {
                 processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
 
                 // remove from unordered list and advance to next element in schema

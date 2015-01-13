@@ -23,7 +23,8 @@ describe("Node EasyXML", function () {
         "undefined":"should parse undefined values",
         "stressTest" : "should handle a stress test",
         "groupedAttributes" : "should be able to handle grouped attributes",
-        "schemaOrder" : "should order output elements based on schema if one is provided"
+        "schemaOrder" : "should order output elements based on schema if one is provided",
+        "bareArray" : "should be able to convert an array that is not contained in an object"
       };
 
   Object.keys(should)
@@ -42,11 +43,11 @@ describe("Node EasyXML", function () {
           config.unwrappedArrays = false;
         }
 
-        if (name === 'schemaOrder') {
+        if (name === 'schemaOrder' || name === 'bareArray') {
           config.schema = require('./schemaOrderSchema');
           objectType = "schemaRoot";
         } else {
-          config.schema = null;
+          config.schema = undefined;
         }
 
         easyXML.configure(config);
