@@ -124,6 +124,8 @@ var EasyXml = function ()
 
         var el = null;
 
+        if (!isNaN(key)) key = "item";
+
         if (!isAttribute(self))
             el = subElement(parentXmlNode, key);
 
