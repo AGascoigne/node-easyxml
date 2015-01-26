@@ -145,9 +145,11 @@ var EasyXml = function ()
                 else
                     parentXmlNode.set(key.substring(1), child);
             } else {
-                Object.keys(child).forEach(function (attrKey){
-                    parentXmlNode.set(attrKey, child[attrKey]);
-                });
+                if(child){
+                    Object.keys(child).forEach(function (attrKey){
+                        parentXmlNode.set(attrKey, child[attrKey]);
+                    });
+                }
             }
         } else if (child === null)
         {
