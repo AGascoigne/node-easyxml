@@ -139,15 +139,17 @@ var EasyXml = function ()
                 }
             }
         } else if (isAttribute(self)) {
-            if (typeof child === 'string' || typeof child === 'number') {
+            if (typeof child === 'string' || typeof child === 'number' || typeof child === 'boolean' || typeof child === 'date') {
                 if (key === self.config.underscoreChar)
                     parentXmlNode.text = child;
                 else
                     parentXmlNode.set(key.substring(1), child);
             } else {
-                Object.keys(child).forEach(function (attrKey){
-                    parentXmlNode.set(attrKey, child[attrKey]);
-                });
+                if(child){
+                    Object.keys(child).forEach(function (attrKey){
+                        parentXmlNode.set(attrKey, child[attrKey]);
+                    });
+                }
             }
         } else if (child === null)
         {
