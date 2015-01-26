@@ -139,7 +139,7 @@ var EasyXml = function ()
                 }
             }
         } else if (isAttribute(self)) {
-            if (typeof child === 'string' || typeof child === 'number') {
+            if (typeof child === 'string' || typeof child === 'number' || typeof child === 'boolean' || typeof child === 'date') {
                 if (key === self.config.underscoreChar)
                     parentXmlNode.text = child;
                 else
