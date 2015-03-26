@@ -88,21 +88,29 @@ var EasyXml = function ()
     function parseChildElement(parentXmlNode, parentObjectNode, objectType)
     {
         var remainingKeys = Object.keys(parentObjectNode);
+        var processRemainingKeys = true;
         if (self.config.schema && objectType) {
             var schema = self.config.schema[objectType];
             var elementInfo, elementNumber = 0;
 
-            if (schema) while (elementInfo = schema[elementNumber++]) {
-                processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
+            if (schema) {
+                if (schema['IncludeNamedElementsOnly']) {
+                    processRemainingKeys = false;
+                }
+                while (elementInfo = schema[elementNumber++]) {
+                    processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
 
-                // remove from unordered list and advance to next element in schema
-                delete remainingKeys[remainingKeys.indexOf(elementInfo.ElementName)];
+                    // remove from unordered list and advancschemaOrderSchema.jse to next element in schema
+                    delete remainingKeys[remainingKeys.indexOf(elementInfo.ElementName)];
+                }
             }
         }
         // process any remaining properties in object key order
-        remainingKeys.forEach(function(key){
-            processChildElement(key, parentXmlNode, parentObjectNode, objectType);
-        });
+        if (processRemainingKeys) {
+            remainingKeys.forEach(function (key) {
+                processChildElement(key, parentXmlNode, parentObjectNode, objectType);
+            });
+        }
     }
 
     /**

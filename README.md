@@ -9,7 +9,7 @@ it synchronously.
 
 ## Installation
 
-    $ npm install easyxml
+    $ npm install easyxml-ts
 
 ## Config
 
@@ -19,6 +19,7 @@ it synchronously.
 * dateFormat: A date format for JS dates, currently accepts 'ISO 8601'
 * indent: A number representing the spaces to indent children, use 0 for no whitespace
 * manifest: Whether or not to add that XML manifest line to the top
+* schema: Whether or not to use a schema to order output elements
 
 ## Purpose
 
