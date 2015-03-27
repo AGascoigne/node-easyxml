@@ -89,16 +89,17 @@ var EasyXml = function ()
     {
         var remainingKeys = Object.keys(parentObjectNode);
         var processRemainingElements = true;
+        var validAttributes = undefined;
         if (self.config.schema && objectType) {
             var schema = self.config.schema[objectType];
-            var elementInfo, elementNumber = 0;
-
             if (schema) {
+                validAttributes = schema['ValidAttributes'];
                 if (schema['IncludeNamedElementsOnly']) {
                     processRemainingElements = false;
                 }
+                var elementInfo, elementNumber = 0;
                 while (elementInfo = schema[elementNumber++]) {
-                    processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
+                    processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type, validAttributes);
 
                     // remove from unordered list and advancschemaOrderSchema.jse to next element in schema
                     delete remainingKeys[remainingKeys.indexOf(elementInfo.ElementName)];
@@ -108,11 +109,17 @@ var EasyXml = function ()
         // process any remaining properties in object key order
         remainingKeys.forEach(function (key) {
             if (isAttribute(key) || processRemainingElements) {
-                processChildElement(key, parentXmlNode, parentObjectNode, objectType);
+                processChildElement(key, parentXmlNode, parentObjectNode, objectType, validAttributes);
             }
         });
     }
 
+    /**
+     * Private
+     * Tests whether a key should be treated as an attribute or not
+     * @param {string} key The name of the key
+     * @returns {boolean} true if the key is to be treated as an attribute
+     */
     function isAttribute(key)
     {
         return (self.config.underscoreAttributes && key.charAt(0) === self.config.underscoreChar);
@@ -122,19 +129,29 @@ var EasyXml = function ()
      * Recursive, Private
      * Takes an object and attaches it to the XML doc
      */
-    function processChildElement(key, parentXmlNode, parentObjectNode, objectType)
+    function processChildElement(key, parentXmlNode, parentObjectNode, objectType, validAttributes)
     {
         if (!parentObjectNode.hasOwnProperty(key)){
             return;
         }
 
+        // Helper function to set an attribute. Only set if validAttributes has not been defined or key is in validAttributes
+        var setAttribute = function(attrKey, child)
+        {
+            if (!validAttributes || validAttributes.indexOf(attrKey) >= 0) {
+                parentXmlNode.set(attrKey, child);
+            }
+        };
+
         var child = parentObjectNode[key];
         var el = null;
 
-        if (!isNaN(key)) key = "item";
-
-        if (!isAttribute(key))
+        if (!isNaN(key)) {
+            key = "item";
+        }
+        if (!isAttribute(key)) {
             el = subElement(parentXmlNode, key);
+        }
 
         if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
             for (var innerKey in child) {
@@ -150,11 +167,11 @@ var EasyXml = function ()
                 if (key === self.config.underscoreChar)
                     parentXmlNode.text = child;
                 else
-                    parentXmlNode.set(key.substring(1), child);
+                    setAttribute(key.substring(1), child);
             } else {
                 if(child){
-                    Object.keys(child).forEach(function (attrKey){
-                        parentXmlNode.set(attrKey, child[attrKey]);
+                    Object.keys(child).forEach(function (childKey){
+                        setAttribute(childKey, child[childKey]);
                     });
                 }
             }
