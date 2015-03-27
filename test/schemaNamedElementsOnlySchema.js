@@ -18,6 +18,7 @@ module.exports = {
             "Type" : null // specifically no schema fo sub-type
         }
         // the other elements are not specified, and should not appear because "IncludeNamedElementsOnly" is set
+        // but attributes and attribute objects should be output
     }
 
 }
