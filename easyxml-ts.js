@@ -88,14 +88,14 @@ var EasyXml = function ()
     function parseChildElement(parentXmlNode, parentObjectNode, objectType)
     {
         var remainingKeys = Object.keys(parentObjectNode);
-        var processRemainingKeys = true;
+        var processRemainingElements = true;
         if (self.config.schema && objectType) {
             var schema = self.config.schema[objectType];
             var elementInfo, elementNumber = 0;
 
             if (schema) {
                 if (schema['IncludeNamedElementsOnly']) {
-                    processRemainingKeys = false;
+                    processRemainingElements = false;
                 }
                 while (elementInfo = schema[elementNumber++]) {
                     processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type);
@@ -106,11 +106,16 @@ var EasyXml = function ()
             }
         }
         // process any remaining properties in object key order
-        if (processRemainingKeys) {
-            remainingKeys.forEach(function (key) {
+        remainingKeys.forEach(function (key) {
+            if (isAttribute(key) || processRemainingElements) {
                 processChildElement(key, parentXmlNode, parentObjectNode, objectType);
-            });
-        }
+            }
+        });
+    }
+
+    function isAttribute(key)
+    {
+        return (self.config.underscoreAttributes && key.charAt(0) === self.config.underscoreChar);
     }
 
     /**
@@ -124,17 +129,11 @@ var EasyXml = function ()
         }
 
         var child = parentObjectNode[key];
-
-        var isAttribute = function (slf)
-        {
-            return (slf.config.underscoreAttributes && key.charAt(0) === self.config.underscoreChar);
-        };
-
         var el = null;
 
         if (!isNaN(key)) key = "item";
 
-        if (!isAttribute(self))
+        if (!isAttribute(key))
             el = subElement(parentXmlNode, key);
 
         if ((!self.config.singularizeChildren && !self.config.unwrappedArrays) && typeof parentXmlNode === 'object' && typeof child === 'object') {
@@ -146,7 +145,7 @@ var EasyXml = function ()
                     el.text = child[innerKey].toString();
                 }
             }
-        } else if (isAttribute(self)) {
+        } else if (isAttribute(key)) {
             if (typeof child === 'string' || typeof child === 'number' || typeof child === 'boolean' || typeof child === 'date') {
                 if (key === self.config.underscoreChar)
                     parentXmlNode.text = child;
