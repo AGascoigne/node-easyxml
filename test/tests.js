@@ -9,7 +9,7 @@ var assert  = require("chai").assert,
     easyXML = require("../easyxml-ts.js");
 
 describe("Node EasyXML", function () {
-  var should = {
+    var should = {
         "names"  : "should parse a JSON object into XML",
         "names1" : "should parse a JSON object with attrs into XML",
         "names2" : "should parse a JSON object with attrs and text node into XML",
@@ -25,54 +25,55 @@ describe("Node EasyXML", function () {
         "groupedAttributes" : "should be able to handle grouped attributes",
         "schemaOrder" : "should order output elements based on schema if one is provided",
         "bareArray" : "should be able to convert an array that is not contained in an object",
-        "schemaNamedElementsOnly" : "should output only elements named in schema in the order provided"
-      };
+        "schemaNamedElementsOnly" : "should output only elements named in schema in the order provided",
+        "schemaValidAttributes" : "should output only ValidAttributes if specified in schema"
+    };
 
-  Object.keys(should)
-    .forEach(function(name){
-      it(should[name], function (done) {
-        var config = {};
-        var objectType = undefined;
-        if (name === 'singularizeChildren' || name === 'singularizeChildren2') {
-          config.singularizeChildren = false;
-        } else {
-          config.singularizeChildren = true;
-        }
-        if (name === 'unwrappedArrays') {
-          config.unwrappedArrays = true;
-        } else {
-          config.unwrappedArrays = false;
-        }
+    Object.keys(should)
+        .forEach(function(name){
+            it(should[name], function (done) {
+                var config = {};
+                var objectType = undefined;
+                if (name === 'singularizeChildren' || name === 'singularizeChildren2') {
+                    config.singularizeChildren = false;
+                } else {
+                    config.singularizeChildren = true;
+                }
+                if (name === 'unwrappedArrays') {
+                    config.unwrappedArrays = true;
+                } else {
+                    config.unwrappedArrays = false;
+                }
+                if (name === 'bareArray') {
+                    config.schema = require('./schemaOrderSchema');
+                    objectType = "schemaRoot";
+                } else if (name.indexOf('schema') === 0) {
+                    var filePath = './' + name + 'Schema';
+                    config.schema = require(filePath);
+                    objectType = "schemaRoot";
+                } else {
+                    config.schema = undefined;
+                }
 
-        if (name === 'schemaOrder' || name === 'bareArray') {
-          config.schema = require('./schemaOrderSchema');
-          objectType = "schemaRoot";
-        } else if (name === 'schemaNamedElementsOnly') {
-          config.schema = require('./schemaNamedElementsOnlySchema');
-          objectType = 'schemaRoot';
-        } else {
-          config.schema = undefined;
-        }
+                easyXML.configure(config);
 
-        easyXML.configure(config);
+                var file = __dirname + "/fixtures/" + name;
 
-        var file = __dirname + "/fixtures/" + name;
+                fs.readFile(file + ".xml", "UTF-8", function (err, data) {
+                    if (err) {
+                        throw err;
+                    }
 
-        fs.readFile(file + ".xml", "UTF-8", function (err, data) {
-          if (err) {
-            throw err;
-          }
+                    var json = require(file + ".json");
+                    if (name === "undefined") {
+                        json.undefinedz = undefined;
+                    }
 
-          var json = require(file + ".json");
-          if (name === "undefined") {
-            json.undefinedz = undefined;
-          }
+                    assert.equal(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
+                    assert.strictEqual(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
 
-          assert.equal(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
-          assert.strictEqual(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
-
-          done();
+                    done();
+                });
+            });
         });
-      });
-    });
 });
