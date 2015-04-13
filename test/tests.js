@@ -37,7 +37,6 @@ describe("Node EasyXML", function () {
                 var config = {};
                 var objectType = undefined;
                 var json;
-                var useJsonFile = true;
 
                 if (name === 'singularizeChildren' || name === 'singularizeChildren2') {
                     config.singularizeChildren = false;
@@ -60,12 +59,7 @@ describe("Node EasyXML", function () {
                     config.schema = undefined;
                 }
                 if (name === 'namedArrayElements') {
-                    config.namedArrayElements = ['TestObject'];
-                    useJsonFile = false;
-                    json = GenerateNamedArrayElements();
-                }
-                else {
-                    config.namedArrayElements = [];
+                    config.bareItemContainer = "TestObject";
                 }
 
                 easyXML.configure(config);
@@ -74,15 +68,12 @@ describe("Node EasyXML", function () {
 
                 fs.readFile(file + ".xml", "UTF-8", function (err, data) {
                     if (err) {
-                        throw err;
+                      throw err;
                     }
 
-                    if (useJsonFile)
-                    {
-                        json = require(file + ".json");
-                        if (name === "undefined") {
-                            json.undefinedz = undefined;
-                        }
+                    json = require(file + ".json");
+                    if (name === "undefined") {
+                      json.undefinedz = undefined;
                     }
 
                     assert.equal(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
@@ -94,10 +85,3 @@ describe("Node EasyXML", function () {
         });
 });
 
-function GenerateNamedArrayElements()
-{
-    function TestObject() {
-    }
-
-    return [new TestObject(), new TestObject(), new TestObject()];
-}
