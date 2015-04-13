@@ -52,7 +52,8 @@ var EasyXml = function ()
         manifest: false,
         unwrappedArrays: false,
         schema: null,
-        indent: 4
+        indent: 4,
+        bareItemContainer : "Item"
     };
 
     /**
@@ -147,7 +148,7 @@ var EasyXml = function ()
         var el = null;
 
         if (!isNaN(key)) {
-            key = "item";
+        	key = self.config.bareItemContainer;
         }
         if (!isAttribute(key)) {
             el = subElement(parentXmlNode, key);

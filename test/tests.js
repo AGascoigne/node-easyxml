@@ -26,14 +26,18 @@ describe("Node EasyXML", function () {
         "schemaOrder" : "should order output elements based on schema if one is provided",
         "bareArray" : "should be able to convert an array that is not contained in an object",
         "schemaNamedElementsOnly" : "should output only elements named in schema in the order provided",
-        "schemaValidAttributes" : "should output only ValidAttributes if specified in schema"
+        "schemaValidAttributes" : "should output only ValidAttributes if specified in schema",
+        "namedArrayElements" : "should name elements within an array based on the configuration"
     };
 
     Object.keys(should)
         .forEach(function(name){
             it(should[name], function (done) {
+
                 var config = {};
                 var objectType = undefined;
+                var json;
+
                 if (name === 'singularizeChildren' || name === 'singularizeChildren2') {
                     config.singularizeChildren = false;
                 } else {
@@ -54,6 +58,9 @@ describe("Node EasyXML", function () {
                 } else {
                     config.schema = undefined;
                 }
+                if (name === 'namedArrayElements') {
+                    config.bareItemContainer = "TestObject";
+                }
 
                 easyXML.configure(config);
 
@@ -61,12 +68,12 @@ describe("Node EasyXML", function () {
 
                 fs.readFile(file + ".xml", "UTF-8", function (err, data) {
                     if (err) {
-                        throw err;
+                      throw err;
                     }
 
-                    var json = require(file + ".json");
+                    json = require(file + ".json");
                     if (name === "undefined") {
-                        json.undefinedz = undefined;
+                      json.undefinedz = undefined;
                     }
 
                     assert.equal(easyXML.render(json, objectType), data, "EasyXML should create the correct XML from a JSON data structure.");
@@ -77,3 +84,4 @@ describe("Node EasyXML", function () {
             });
         });
 });
+
