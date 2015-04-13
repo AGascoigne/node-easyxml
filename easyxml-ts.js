@@ -52,7 +52,8 @@ var EasyXml = function ()
         manifest: false,
         unwrappedArrays: false,
         schema: null,
-        indent: 4
+        indent: 4,
+        namedArrayElements: []
     };
 
     /**
@@ -147,7 +148,12 @@ var EasyXml = function ()
         var el = null;
 
         if (!isNaN(key)) {
-            key = "item";
+
+        	key = "item";
+
+			if (typeof child === 'object' && self.config.namedArrayElements.indexOf(child.constructor.name) > -1) {
+				key = child.constructor.name;
+			}
         }
         if (!isAttribute(key)) {
             el = subElement(parentXmlNode, key);
