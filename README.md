@@ -20,6 +20,7 @@ it synchronously.
 * indent: A number representing the spaces to indent children, use 0 for no whitespace
 * manifest: Whether or not to add that XML manifest line to the top
 * schema: Whether or not to use a schema to order output elements
+* namedArrayElements: List of strings that indicates the objects that will not use the default name 'item' when output in an array
 
 ## Purpose
 
