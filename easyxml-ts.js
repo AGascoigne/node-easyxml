@@ -105,6 +105,7 @@ var EasyXml = function ()
         }
 
         var processRemainingElements = true;
+        var includedCount = 0;
         var validAttributes = undefined;
         if (self.config.schema && objectType) {
             var schema = self.config.schema[objectType];
@@ -115,16 +116,21 @@ var EasyXml = function ()
                 }
                 var elementInfo, elementNumber = 0;
                 while (elementInfo = schema[elementNumber++]) {
+                    if (parentObjectNode[elementInfo.ElementName] != undefined) includedCount++;
                     processChildElement(elementInfo.ElementName, parentXmlNode, parentObjectNode, elementInfo.Type, validAttributes);
 
-                    // remove from unordered list and advancschemaOrderSchema.jse to next element in schema
+                    // remove from unordered list and advance to next element in schema
                     delete remainingKeys[remainingKeys.indexOf(elementInfo.ElementName)];
                 }
             }
         }
-        // process any remaining properties in object key order
+
+        // Process any remaining properties in object key order
+        // Skipped if schema states known objects only.
+        // If schema didn't match any supplied elements, we output everything.
+        // Attributes are always added regardless of schema
         remainingKeys.forEach(function (key) {
-            if (isAttribute(key) || processRemainingElements) {
+            if (isAttribute(key) || processRemainingElements || includedCount < 1) {
                 processChildElement(key, parentXmlNode, parentObjectNode, objectType, validAttributes);
             }
         });

@@ -1,0 +1,8 @@
+<response>
+    <single>
+        <single>JustMe</single>
+    </single>
+    <deeper attr="also not in schema">
+        <Wrong>Not in schema</Wrong>
+    </deeper>
+</response>

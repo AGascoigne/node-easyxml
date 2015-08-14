@@ -26,6 +26,7 @@ describe("Node EasyXML", function () {
         "schemaOrder" : "should order output elements based on schema if one is provided",
         "bareArray" : "should be able to convert an array that is not contained in an object",
         "schemaNamedElementsOnly" : "should output only elements named in schema in the order provided",
+        "schemaNamedElementsOnlySafety" : "should output all properties if schema rejects all children",
         "schemaValidAttributes" : "should output only ValidAttributes if specified in schema",
         "namedArrayElements" : "should name elements within an array based on the configuration",
         "nonObjectValues" : "should handle non-object input values"

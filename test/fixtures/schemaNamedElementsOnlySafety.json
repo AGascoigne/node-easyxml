@@ -1,0 +1,13 @@
+{
+    "many": [
+        "One",
+        "Two"
+        ],
+    "single": [
+        "JustMe"
+        ],
+    "deeper": {
+        "Wrong":"Not in schema",
+        "_attr":"also not in schema"
+    }
+}
