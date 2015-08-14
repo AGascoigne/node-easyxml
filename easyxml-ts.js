@@ -74,7 +74,11 @@ var EasyXml = function ()
     {
         var xml = element(rootElementOverride || self.config.rootElement);
 
-        parseChildElement(xml, object, objectType);
+        if (isEnumerable(object)) {
+            parseChildElement(xml, object, objectType);
+        } else if (object != null && object != undefined) {
+            xml.text = ''+object;
+        }
 
         return new ElementTree(xml).write({
             xml_declaration: self.config.manifest,
@@ -82,13 +86,24 @@ var EasyXml = function ()
         });
     };
 
+    function isEnumerable(value) {
+      var type = typeof value;
+      return !!value && (type == 'object' || type == 'function') && (type != 'string');
+    }
+
     /**
      * Recursive, Private
      * Takes an object and calls appropriate function to generate xml node in document
      */
     function parseChildElement(parentXmlNode, parentObjectNode, objectType)
     {
-        var remainingKeys = Object.keys(parentObjectNode);
+        var remainingKeys;
+        if (isEnumerable(parentObjectNode)) {
+            remainingKeys = Object.keys(parentObjectNode);
+        } else { 
+            remainingKeys = [];
+        }
+
         var processRemainingElements = true;
         var validAttributes = undefined;
         if (self.config.schema && objectType) {

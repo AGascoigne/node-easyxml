@@ -27,7 +27,8 @@ describe("Node EasyXML", function () {
         "bareArray" : "should be able to convert an array that is not contained in an object",
         "schemaNamedElementsOnly" : "should output only elements named in schema in the order provided",
         "schemaValidAttributes" : "should output only ValidAttributes if specified in schema",
-        "namedArrayElements" : "should name elements within an array based on the configuration"
+        "namedArrayElements" : "should name elements within an array based on the configuration",
+        "nonObjectValues" : "should handle non-object input values"
     };
 
     Object.keys(should)
@@ -60,6 +61,15 @@ describe("Node EasyXML", function () {
                 }
                 if (name === 'namedArrayElements') {
                     config.bareItemContainer = "TestObject";
+                }
+
+                if (name === 'nonObjectValues') {
+                  assert.equal(easyXML.render(null, objectType), "<response />\n", "Null should result in empty");
+                  assert.equal(easyXML.render(undefined, objectType), "<response />\n", "Undefined should result in empty");
+                  assert.equal(easyXML.render("hello", objectType), "<response>hello</response>\n", "String should result in contained string");
+                  assert.equal(easyXML.render(123, objectType), "<response>123</response>\n", "Number should result in contained string");
+
+                  return done();
                 }
 
                 easyXML.configure(config);
