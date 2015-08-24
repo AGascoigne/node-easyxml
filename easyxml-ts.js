@@ -100,7 +100,7 @@ var EasyXml = function ()
         var remainingKeys;
         if (isEnumerable(parentObjectNode)) {
             remainingKeys = Object.keys(parentObjectNode);
-        } else { 
+        } else {
             remainingKeys = [];
         }
 
@@ -226,7 +226,7 @@ var EasyXml = function ()
             }
         } else if (typeof child === 'object' && child.constructor && child.constructor.name && child.constructor.name === 'Array') {
             // Array
-            var subElementName = inflect.singularize(key);
+            var subElementName = self.config.unwrappedArrays && !self.config.singularizeChildren ? key : inflect.singularize(key);
 
             for (var key2 in child) {
                 // if unwrapped arrays, make new subelements on the parent.
